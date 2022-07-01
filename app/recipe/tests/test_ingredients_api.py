@@ -12,6 +12,11 @@ from rest_framework.test import APIClient
 INGREDIENTS_URL = reverse("recipe:ingredient-list")
 
 
+def detail_url(ingredient_id):
+    """Create and return an ingredient detail url."""
+    return reverse("recipe:ingredient-detail", args=[ingredient_id])
+
+
 def create_user(
     email="user@example.com",
     password="testpass123",
@@ -65,3 +70,28 @@ class PrivateIngredientsAPITests(TestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], ingredient.name)
         self.assertEqual(response.data[0]["id"], ingredient.id)
+
+    def test_update_ingredient(self):
+        """Test updating an ingredient."""
+        ingredient = Ingredient.objects.create(user=self.user, name="Cilantro")
+        payload = {"name": "Coriander"}
+        url = detail_url(ingredient_id=ingredient.id)
+        response = self.client.patch(url, payload)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ingredient.refresh_from_db()
+        self.assertEqual(ingredient.name, payload["name"])
+
+    def test_delete_ingredient(self):
+        """Test deleting an ingredient."""
+        ingredient = Ingredient.objects.create(
+            user=self.user,
+            name="Lettuce",
+        )
+
+        url = detail_url(ingredient_id=ingredient.id)
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        ingredient = Ingredient.objects.filter(user=self.user)
+        self.assertFalse(ingredient.exists())
