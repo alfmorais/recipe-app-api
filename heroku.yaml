@@ -1,0 +1,5 @@
+build:
+  docker:
+    web: Dockerfile
+run:
+  web: gunicorn recipe-app-api.wsgi:application --bind 0.0.0.0:$PORT
