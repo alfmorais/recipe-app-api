@@ -15,15 +15,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Heroku
-      - run: [
-          heroku config:set DISABLE_COLLECTSTATIC=1,
-          git push heroku master,
-          heroku run python manage.py migrate,
-          heroku run 'bower install --config.interactive=false;grunt prep;python manage.py collectstatic --noinput',
-          heroku config:unset DISABLE_COLLECTSTATIC,
-          heroku run python manage.py collectstatic,
-      ]
       - name: Test
         run: docker compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test --verbosity 2 --force-color"
       - name: Lint
